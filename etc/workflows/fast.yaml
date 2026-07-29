@@ -20,6 +20,15 @@ configuration_panel_json: |-
     ]
   }]
 operations:
+
+  - id: configure-by-dcterm
+    description: Determine whether series has any creator email
+    configurations:
+      - dccatalog: series
+      - dcterm: creator
+      - match-value: "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
+      - hasEmails: true
+
   - id: defaults
     description: Applying default configuration values
     configurations:
@@ -114,6 +123,16 @@ operations:
       - download-source-flavors: dublincore/*,security/*,captions/*
       - download-source-tags: engage-download
       - check-availability: false
+
+  - id: send-email
+    fail-on-error: false
+    if: ${hasEmails}
+    description: Sending email to series creators after publish
+    configurations:
+      - to: "${catalogs['dublincore/series']['creator']}"
+      - subject: ${mediaPackage.title} has been published
+      - body-template-file: eventPublished
+      - skip-invalid-address: true
 
   - id: snapshot
     fail-on-error: true
